@@ -15,12 +15,11 @@ public class SplineControl : MonoBehaviour
     [SerializeField] private float radius = .35f;
     [SerializeField] private Wheel[] wheels;
     [SerializeField] private WheelCollider[] wheelCol;
+    [SerializeField] private Transform front, back;
 
     private SplinePoint[] points = new SplinePoint[3];
     private List<GameObject> sCol = new List<GameObject>();
-    private float _speed;
     private Vector3 center;
-
     private WheelHit hit;
 
 
@@ -38,7 +37,6 @@ public class SplineControl : MonoBehaviour
 
     private void Start()
     {
-        _speed = speed;
         rb = GetComponent<Rigidbody>();
         for (int i = 0; i < points.Length; i++)
         {
@@ -74,7 +72,9 @@ public class SplineControl : MonoBehaviour
         {
             isMove = true;
             foreach (Wheel wheel in wheels)
+            {
                 wheel.WheelRotate();
+            }
 
             AddForceSpeed(false);
         }
@@ -85,15 +85,10 @@ public class SplineControl : MonoBehaviour
 
     private void Move()
     {
-
-        for (int i = 0; i < 2; i++)
-        {
-            WheelMotorTorque[i] = rb.velocity;
-        }
-
         _hit[0] = wheelCol[0].GetGroundHit(out hit);
         _hit[1] = wheelCol[1].GetGroundHit(out hit);
-        if (rb.velocity.z > 10.0f)
+
+        if (rb.velocity.z > 20.0f)
             foreach (WheelCollider wheel in wheelCol)
             {
                 wheel.motorTorque = speed * 10;
@@ -105,18 +100,12 @@ public class SplineControl : MonoBehaviour
 
     public void AddForceSpeed(bool isPower)
     {
-        foreach (WheelCollider wheel in wheelCol)
+        if (_hit[0] && _hit[1] && !isPower)
         {
-            if (wheel.GetGroundHit(out hit))
-            {
-                rb.AddForce(transform.forward * speed, ForceMode.Impulse);
-            }
+            rb.AddForce(transform.forward * speed * .5f, ForceMode.Impulse);
         }
-
-        //    if (wheelCol[0].GetGroundHit(out hit) && wheelCol[1].GetGroundHit(out hit) && !isPower)
-        //    rb.AddForce(transform.forward * speed, ForceMode.Impulse);
-        //else if(isPower)
-        //    rb.AddForce(transform.forward * speed, ForceMode.Impulse);
+        else if (isPower)
+            rb.AddForce(transform.forward * speed, ForceMode.Impulse);
     }
 
     public void SplinePointUpdate(LineDrawerUI line)
@@ -169,8 +158,6 @@ public class SplineControl : MonoBehaviour
         centerOfMass.position = center;
         rb.centerOfMass = centerOfMass.localPosition;
 
-        //transform.rotation = Quaternion.Euler(0, 0, 0);
-        //transform.position = new Vector3(0, transform.position.y + 1.2f, transform.position.z);
-
+        transform.position = new Vector3(transform.position.x, transform.position.y + 1.5f, transform.position.z);
     }
 }

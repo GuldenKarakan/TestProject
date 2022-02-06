@@ -19,8 +19,8 @@ public class Bonus : MonoBehaviour
         {
             isContac = true;
             GetComponent<Collider>().enabled = false;
-            float bonusSpeed = player.speed * 10f;
-            //player.speed += bonusSpeed;
+            float bonusSpeed = player.speed * 2f;
+            player.speed += bonusSpeed;
             player.AddForceSpeed(true);
             particle.Play();
 
@@ -34,7 +34,7 @@ public class Bonus : MonoBehaviour
         yield return new WaitForSeconds(.3f);
         particle.Stop();
 
-        //yield return new WaitForSeconds(1f);
-        //player.speed -= speed;
+        yield return new WaitForSeconds(1f);
+        player.speed -= speed;
     }
 }

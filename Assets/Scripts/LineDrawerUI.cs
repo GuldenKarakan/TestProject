@@ -11,6 +11,7 @@ public class LineDrawerUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     [SerializeField] private LineRenderer Line;
     [SerializeField] private float lineWidth;
     [SerializeField] private float minimumVertexDistance;
+    private SplineControl player;
     private float inverseScaleFactor;
     //private bool isLineStarted;
 
@@ -22,6 +23,7 @@ public class LineDrawerUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
         //isLineStarted = false;
         Line.positionCount = 0;
         inverseScaleFactor = 1f / GetComponentInParent<Canvas>().scaleFactor;
+        player = SplineControl.instance;
     }
 
     public void OnPointerDown(PointerEventData ped)
