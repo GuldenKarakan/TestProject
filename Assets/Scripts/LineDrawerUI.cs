@@ -11,6 +11,7 @@ public class LineDrawerUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     [SerializeField] private LineRenderer Line;
     [SerializeField] private float lineWidth;
     [SerializeField] private float minimumVertexDistance;
+    private float inverseScaleFactor;
     //private bool isLineStarted;
 
     void Start()
@@ -20,11 +21,12 @@ public class LineDrawerUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
         //isLineStarted = false;
         Line.positionCount = 0;
+        inverseScaleFactor = 1f / GetComponentInParent<Canvas>().scaleFactor;
     }
 
     public void OnPointerDown(PointerEventData ped)
     {
-        Vector2 pos = (ped.position - (Vector2)imageRect.position) * 2;
+        Vector2 pos = (ped.position - (Vector2)imageRect.position) * 2 * inverseScaleFactor;
         pos.x /= imageRect.sizeDelta.x;
         pos.y /= imageRect.sizeDelta.y;
 
@@ -50,7 +52,7 @@ public class LineDrawerUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
     public void OnDrag(PointerEventData ped)
     {
-        Vector2 pos = (ped.position - (Vector2)imageRect.position) * 2;
+        Vector2 pos = (ped.position - (Vector2)imageRect.position) * 2 * inverseScaleFactor;
         pos.x /= imageRect.sizeDelta.x;
         pos.y /= imageRect.sizeDelta.y;
 

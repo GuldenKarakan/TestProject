@@ -1,15 +1,40 @@
 using UnityEngine;
+using System.Collections;
 
 public class Bonus : MonoBehaviour
 {
-    [SerializeField] private ParticleSystem particle;
-    private void OnCollisionEnter(Collision collision)
-    {
-        GetComponent<Collider>().enabled = false;
-        SplineControl player = SplineControl.instance;
-        player.rb.velocity += player.transform.forward * 10f;
-        particle.Play();
+    private ParticleSystem particle;
+    private SplineControl player;
+    private bool isContac = false;
 
-        Destroy(gameObject, .3f);
+    private void Start()
+    {
+        particle = GetComponent<ParticleSystem>();
+        player = SplineControl.instance;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.tag == "body" && !isContac)
+        {
+            isContac = true;
+            GetComponent<Collider>().enabled = false;
+            float bonusSpeed = player.speed * 10f;
+            //player.speed += bonusSpeed;
+            player.AddForceSpeed(true);
+            particle.Play();
+
+            StartCoroutine(ReturnOldSpeed(bonusSpeed));
+
+        }
+    }
+
+    private IEnumerator ReturnOldSpeed(float speed)
+    {
+        yield return new WaitForSeconds(.3f);
+        particle.Stop();
+
+        //yield return new WaitForSeconds(1f);
+        //player.speed -= speed;
     }
 }

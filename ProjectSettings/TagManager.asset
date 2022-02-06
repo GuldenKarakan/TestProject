@@ -4,7 +4,11 @@
 TagManager:
   serializedVersion: 2
   tags:
+  - Obs
+  - Crash
   - road
+  - Fire
+  - body
   layers:
   - Default
   - TransparentFX
@@ -13,14 +17,14 @@ TagManager:
   - Water
   - UI
   - 
-  - spline
+  - 
+  - Pointer
+  - Not_In_Minimap
+  - Minimap_Layer
   - wheel
-  - draw
-  - 
-  - 
-  - 
-  - 
-  - 
+  - spline
+  - road
+  - wheelCollider
   - 
   - 
   - 

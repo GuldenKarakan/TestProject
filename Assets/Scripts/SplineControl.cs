@@ -7,16 +7,21 @@ public class SplineControl : MonoBehaviour
     [HideInInspector] public bool isMove = false;
     [HideInInspector] public Rigidbody rb;
     public float speed;
+    public Vector3[] WheelMotorTorque;
+    public bool[] _hit;
 
     [SerializeField] private SplineComputer spline;
     [SerializeField] private Transform centerOfMass;
     [SerializeField] private float radius = .35f;
-    [SerializeField] private List<GameObject> sCol = new List<GameObject>();
     [SerializeField] private Wheel[] wheels;
+    [SerializeField] private WheelCollider[] wheelCol;
 
     private SplinePoint[] points = new SplinePoint[3];
+    private List<GameObject> sCol = new List<GameObject>();
     private float _speed;
     private Vector3 center;
+
+    private WheelHit hit;
 
 
     #region Singleton
@@ -44,7 +49,7 @@ public class SplineControl : MonoBehaviour
             points[i].color = Color.white;
 
             center += points[i].position;
-            AddSpherCollider(i);
+            //AddSpherCollider(i);
         }
         center /= points.Length;
         points[1].position.y = 1.5f;
@@ -70,6 +75,8 @@ public class SplineControl : MonoBehaviour
             isMove = true;
             foreach (Wheel wheel in wheels)
                 wheel.WheelRotate();
+
+            AddForceSpeed(false);
         }
         if (!isMove) return;
 
@@ -78,15 +85,43 @@ public class SplineControl : MonoBehaviour
 
     private void Move()
     {
-        rb.AddRelativeForce(new Vector3(0, 0, Vector3.forward.z) * speed);
-        //Vector3 localVelocity = transform.InverseTransformDirection(rb.velocity);
-        //localVelocity.x = 0;
-        //rb.velocity = transform.TransformDirection(localVelocity);
+
+        for (int i = 0; i < 2; i++)
+        {
+            WheelMotorTorque[i] = rb.velocity;
+        }
+
+        _hit[0] = wheelCol[0].GetGroundHit(out hit);
+        _hit[1] = wheelCol[1].GetGroundHit(out hit);
+        if (rb.velocity.z > 10.0f)
+            foreach (WheelCollider wheel in wheelCol)
+            {
+                wheel.motorTorque = speed * 10;
+                wheel.steerAngle = 0;
+            }
+        else AddForceSpeed(false);
+
+    }
+
+    public void AddForceSpeed(bool isPower)
+    {
+        foreach (WheelCollider wheel in wheelCol)
+        {
+            if (wheel.GetGroundHit(out hit))
+            {
+                rb.AddForce(transform.forward * speed, ForceMode.Impulse);
+            }
+        }
+
+        //    if (wheelCol[0].GetGroundHit(out hit) && wheelCol[1].GetGroundHit(out hit) && !isPower)
+        //    rb.AddForce(transform.forward * speed, ForceMode.Impulse);
+        //else if(isPower)
+        //    rb.AddForce(transform.forward * speed, ForceMode.Impulse);
     }
 
     public void SplinePointUpdate(LineDrawerUI line)
     {
-        speed = _speed;
+        //speed = _speed;
         center = Vector3.zero;
         int count = sCol.Count;
         for(int i = 0; i < count; i++)
@@ -106,25 +141,25 @@ public class SplineControl : MonoBehaviour
 
         }
 
-        Vector3 vektor = Vector3.zero, playerPos;
+        Vector3 vector = Vector3.zero, playerPos;
         for (int i = 0; i < points.Length; i++)
         {
-            if (vektor.y > points[i].position.y)// En dip noktayı buluyor
-                vektor.y = points[i].position.y;
+            if (vector.y > points[i].position.y)// En dip noktayı buluyor
+                vector.y = points[i].position.y;
         }
-        vektor.y *= -1;
+        vector.y *= -1;
 
         if (points[1].position.z != 0)// ilk noktanın z ekseni hep sıfırıncı noktada oluyor.
-            vektor.z = points[1].position.z * -1;
+            vector.z = points[1].position.z * -1;
 
         playerPos = transform.position;
         //playerPos.y += 3f;
-        vektor = vektor + playerPos;
+        vector = vector + playerPos;
 
         for (int i = 0; i < points.Length; i++)
         {
             /// Dip noktaya göre pointleri düzenliyor
-            points[i].position += vektor;
+            points[i].position += vector;
             center += points[i].position;
             AddSpherCollider(i);
         }
@@ -134,7 +169,7 @@ public class SplineControl : MonoBehaviour
         centerOfMass.position = center;
         rb.centerOfMass = centerOfMass.localPosition;
 
-        transform.rotation = Quaternion.Euler(0, 0, 0);
+        //transform.rotation = Quaternion.Euler(0, 0, 0);
         //transform.position = new Vector3(0, transform.position.y + 1.2f, transform.position.z);
 
     }
